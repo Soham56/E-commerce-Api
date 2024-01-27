@@ -38,8 +38,8 @@ userSchema.pre("save", async function () {
     this.password = hashPassword;
 });
 
-userSchema.method.comparePassword = async function (givenPassword) {
-    const isValidPassword = await bcrypt.compare(this.password, givenPassword);
+userSchema.methods.comparePassword = async function (givenPassword) {
+    const isValidPassword = await bcrypt.compare(givenPassword, this.password);
     return isValidPassword;
 };
 

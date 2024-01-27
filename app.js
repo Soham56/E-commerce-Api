@@ -8,6 +8,7 @@ const port = process.env.PORT || 5000;
 
 // other modules
 const morgan = require("morgan");
+const cookieParser = require("cookie-parser");
 
 // connect to the database function
 const connectDb = require("./db/connectDb");
@@ -21,15 +22,21 @@ const authRoutes = require("./routes/authRoutes");
 
 app.use(morgan("tiny"));
 app.use(express.json());
+app.use(cookieParser(process.env.JWT_SECRET));
 
 app.get("/", (req, res) => {
     res.send("Hello World");
 });
+
+app.get("/api/v1/", (req, res) => {
+    console.log(req.signedCookies);
+    res.send("checking");
+});
+
 app.use("/api/v1/auth", authRoutes);
 
 app.use(routeNotFoundMiddleware);
 app.use(errorHandlerMiddleware);
-
 const start = async () => {
     try {
         await connectDb(process.env.MONGO_URL);

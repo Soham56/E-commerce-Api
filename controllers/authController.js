@@ -1,7 +1,7 @@
 const User = require("../models/user");
 const CustomError = require("../errors");
 const { StatusCodes } = require("http-status-codes");
-const { generateToken } = require("../utils");
+const { attachCookieResponse } = require("../utils");
 
 const register = async (req, res) => {
     const { name, email, password } = req.body;
@@ -24,18 +24,38 @@ const register = async (req, res) => {
     const user = await User.create({ name, email, password, role });
     const payload = { name, userId: user._id, role: user.role };
 
-    const token = generateToken({ payload });
+    attachCookieResponse({ res, user: payload });
 
-    res.cookie("token", token);
     res.status(StatusCodes.CREATED).json({ user: payload });
 };
 
 const login = async (req, res) => {
-    res.send("login");
+    const { email, password } = req.body;
+    if (!password || !email)
+        throw new CustomError.BadRequestError(
+            "Please provide your email and password"
+        );
+
+    const user = await User.findOne({ email });
+    if (!user)
+        throw new CustomError.UnauthenticatedError("User is not defined");
+
+    console.log(password);
+
+    const isValidPassword = await user.comparePassword(password);
+    if (!isValidPassword) {
+        throw new CustomError.UnauthenticatedError("Invalid password !");
+    }
+
+    const payload = { name: user.name, userId: user._id, role: user.role };
+
+    attachCookieResponse({ res, user: payload });
+    res.status(StatusCodes.CREATED).json({ user: payload });
 };
 
 const logout = async (req, res) => {
-    res.send("logout");
+    res.clearCookie("token");
+    res.status(StatusCodes.OK).json({ msg: "user logged out successfully" });
 };
 
 module.exports = {
