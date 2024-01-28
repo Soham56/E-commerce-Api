@@ -19,6 +19,7 @@ const errorHandlerMiddleware = require("./middleware/error-handler");
 
 // requiring all routes
 const authRoutes = require("./routes/authRoutes");
+const userRoutes = require("./routes/userRoutes");
 
 app.use(morgan("tiny"));
 app.use(express.json());
@@ -34,6 +35,7 @@ app.get("/api/v1/", (req, res) => {
 });
 
 app.use("/api/v1/auth", authRoutes);
+app.use("/api/v1/users", userRoutes);
 
 app.use(routeNotFoundMiddleware);
 app.use(errorHandlerMiddleware);
