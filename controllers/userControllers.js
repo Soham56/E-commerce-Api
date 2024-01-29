@@ -5,7 +5,11 @@ const {
     NotFoundError,
     UnauthenticatedError,
 } = require("../errors");
-const { createTokenPayload, attachCookieResponse } = require("../utils");
+const {
+    createTokenPayload,
+    attachCookieResponse,
+    checkPermissons,
+} = require("../utils");
 
 const getAllUsers = async (req, res) => {
     const users = await User.find({ role: "user" }).select("-password -__v");
@@ -14,6 +18,7 @@ const getAllUsers = async (req, res) => {
 
 const getSingleUser = async (req, res) => {
     const { id: userId } = req.params;
+    checkPermissons(req.user, id);
     const user = await User.findOne({ _id: userId, role: "user" }).select(
         "-password -__v"
     );
@@ -34,11 +39,16 @@ const updateUser = async (req, res) => {
         throw new BadRequestError("Please provide name and email");
     }
 
-    const user = await User.findOneAndUpdate(
-        { _id: req.user.userId },
-        { name, email },
-        { new: true, runValidators: true }
-    ).select("-password -__v");
+    // const user = await User.findOneAndUpdate(
+    //     { _id: req.user.userId },
+    //     { name, email },
+    //     { new: true, runValidators: true }
+    // ).select("-password -__v");
+
+    const user = await User.findById(req.user.userId);
+    user.name = name;
+    user.email = email;
+    await user.save();
 
     const payload = createTokenPayload(user);
 
