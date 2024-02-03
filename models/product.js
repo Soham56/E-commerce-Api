@@ -6,7 +6,7 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: [true, "Please provide your name"],
             trim: true,
-            maxlen: [],
+            maxlen: [20, "Name must be within 20 characters"],
         },
         price: {
             type: Number,
@@ -17,12 +17,20 @@ const productSchema = new mongoose.Schema(
             type: String,
             required: [true, "Please provide your name"],
             trim: true,
+            maxlen: [200, "Name must be within 20 characters"],
         },
         image: {
             type: String,
+            required: true,
+            default: "./image/default-pic.jpg",
         },
         category: {
             type: String,
+            enum: {
+                values: [],
+                message: "{VALUE} is not supported",
+            },
+            required: [true, "please mention the category"],
         },
         company: {
             type: String,
